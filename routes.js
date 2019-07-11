@@ -15,25 +15,25 @@ AWS.config.update({
 });
 
 var s3 = new AWS.S3();
-var filePath = "./queries.txt";
+// var filePath = "./queries.txt";
 
-var params = {
-  Bucket: 'picnic-book-bucket',
-  Body : fs.createReadStream(filePath),
-  Key : "folder/"+Date.now()+"_"+path.basename(filePath)
-};
+// var params = {
+//   Bucket: 'picnic-book-bucket',
+//   Body : fs.createReadStream(filePath),
+//   Key : "folder/"+Date.now()+"_"+path.basename(filePath)
+// };
 
-s3.upload(params, function (err, data) {
-  //handle error
-  if (err) {
-    console.log("Error", err);
-  }
+// s3.upload(params, function (err, data) {
+//   //handle error
+//   if (err) {
+//     console.log("Error", err);
+//   }
 
-  //success
-  if (data) {
-    console.log("Uploaded in:", data.Location);
-  }
-});
+//   //success
+//   if (data) {
+//     console.log("Uploaded in:", data.Location);
+//   }
+// });
 
 
 var con = mysql.createConnection({
@@ -129,11 +129,13 @@ router.post('/photoUpload',upload.single('fileData'), (req, res,next) => {
       //handle error
       if (err) {
         console.log("Error", err);
+        res.status(500).json({success: false}).end();
       }
     
       //success
       if (data) {
         console.log("Uploaded in:", data.Location);
+        res.status(200).json({success: false}).end();
       //   var sql = "INSERT INTO products (file_name, name, description, category, brand, price) VALUES ("+ fileName +",'pname','pdesc','pcategaory','pbrand', 'pprice');"
       //   console.log('File contents ',contents);
       //  var sqlResult  = '';
