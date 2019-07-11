@@ -5,28 +5,28 @@ var multer = require('multer');
 var upload = multer();
 var mysql = require('mysql');
 
-var con = mysql.createConnection({
-  host: "techserver.techbuiz.com",
-  user: "remoteabdullah",
-  password: "remoteabbasi",
-  database: "techbuiz_mysql"
-});
+// var con = mysql.createConnection({
+//   host: "techserver.techbuiz.com",
+//   user: "remoteabdullah",
+//   password: "remoteabbasi",
+//   database: "techbuiz_mysql"
+// });
 
-con.connect(function(err) {
-  if (err) throw err;
-  console.log('MysqL Connected *****');
-  con.query("SELECT * FROM customers", function (err, result, fields) {
-    if (err) throw err;
-    console.log(result);
-  });
-});
+// con.connect(function(err) {
+//   if (err) throw err;
+//   console.log('MysqL Connected *****');
+//   con.query("SELECT * FROM customers", function (err, result, fields) {
+//     if (err) throw err;
+//     console.log(result);
+//   });
+// });
 
-var config = {
-  username: 'root',
-  password: '#Abby@12345',
-  apiKey: 'sBMxRYgJLjQcDN1AbJ7KBUIrDqcT9UFd',
-  serverUrl: 'http://techbuiz.com/admin/includes/api.php'
-};
+// var config = {
+//   username: 'root',
+//   password: '#Abby@12345',
+//   apiKey: 'sBMxRYgJLjQcDN1AbJ7KBUIrDqcT9UFd',
+//   serverUrl: 'http://techbuiz.com/admin/includes/api.php'
+// };
 
 router.get('/', function(req, res){
    console.log('Request recieved ping');
