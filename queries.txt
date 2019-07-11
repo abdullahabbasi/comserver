@@ -1,0 +1,13 @@
+
+/*  Create Product Table  */
+CREATE TABLE products (
+	id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	file_name VARCHAR(100),	//store server file path
+	name VARCHAR(30) NOT NULL,
+	description VARCHAR(100),
+	category VARCHAR(30),
+	brand VARCHAR(30),
+	price VARCHAR(10)
+);
+
+/*  End Create Product Table  */

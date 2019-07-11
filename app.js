@@ -36,30 +36,6 @@ app.use('/api/', router);
 const PORT = process.env.PORT || 8081;
 app.listen(PORT);
 console.log('server started');
-
-
-var con = mysql.createConnection({
-  host: "techserver.techbuiz.com",
-  user: "remoteabdullah",
-  password: "remoteabbasi",
-  database: "techbuiz_mysql"
-});
-
-con.connect(function(err) {
-  if (err) throw err;
-  console.log('MysqL Connected *****');
-  con.query("SELECT * FROM customers", function (err, result, fields) {
-    if (err) throw err;
-    console.log(result);
-  });
-});
-var config = {
-  username: 'root',
-  password: '#Abby@12345',
-  apiKey: 'sBMxRYgJLjQcDN1AbJ7KBUIrDqcT9UFd',
-  serverUrl: 'http://techbuiz.com/admin/includes/api.php'
-};
-
 /*
 var wclient = new whmcs(config);
 //console.log('whmcs obj ', wclient);
