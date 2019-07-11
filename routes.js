@@ -30,6 +30,10 @@ con.connect(function(err) {
 
 router.get('/', function(req, res){
    console.log('Request recieved ping');
+   con.query("SELECT * FROM testtable", function (err, result, fields) {
+    if (err) throw err;
+    console.log(result);
+  });
    res.send('success');
 // res.send("Hello world!!!!");
 });
