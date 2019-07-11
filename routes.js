@@ -114,6 +114,38 @@ router.post('/addProduct',upload.single('fileData'), (req, res,next) => {
 });
 
 
+router.post('/photoUpload',upload.single('fileData'), (req, res,next) => {
+  console.log('photo api invoked ', req);//this will be automatically set by multer
+   var fileName ="'" +  __dirname + req.file.filename + "'";
+  console.log('fileName', fileName);
+  var params = {
+    Bucket: 'picnic-book-bucket',
+    Body : fs.createReadStream(fileName),
+    Key : "folder/"+Date.now()+"_"+path.basename(filePath)
+  };
+  
+  s3.upload(params, function (err, data) {
+    //handle error
+    if (err) {
+      console.log("Error", err);
+    }
+  
+    //success
+    if (data) {
+      console.log("Uploaded in:", data.Location);
+    //   var sql = "INSERT INTO products (file_name, name, description, category, brand, price) VALUES ("+ fileName +",'pname','pdesc','pcategaory','pbrand', 'pprice');"
+    //   console.log('File contents ',contents);
+    //  var sqlResult  = '';
+    //  con.query(sql, function (err, result, fields) {
+    //    if (err) throw err;
+    //       sqlResult = result;
+    //        console.log(result);
+    //        res.send(sqlResult);
+    //   });
+    }
+  });
+});
+
 router.all("*", function(req, res) {
     res.status(404).json({success: false}).end();
 });
