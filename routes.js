@@ -5,21 +5,21 @@ var multer = require('multer');
 var upload = multer();
 var mysql = require('mysql');
 
-// var con = mysql.createConnection({
-//   host: "techserver.techbuiz.com",
-//   user: "remoteabdullah",
-//   password: "remoteabbasi",
-//   database: "techbuiz_mysql"
-// });
+var con = mysql.createConnection({
+  host: "us-cdbr-iron-east-02.cleardb.net",
+  user: "b062127b2d7096",
+  password: "933cd167d970cb1",
+  database: "heroku_2fbd37a89f39bd3"
+});
 
-// con.connect(function(err) {
-//   if (err) throw err;
-//   console.log('MysqL Connected *****');
-//   con.query("SELECT * FROM customers", function (err, result, fields) {
-//     if (err) throw err;
-//     console.log(result);
-//   });
-// });
+con.connect(function(err) {
+  if (err) throw err;
+  console.log('MysqL Connected *****');
+  con.query("SELECT * FROM testtable", function (err, result, fields) {
+    if (err) throw err;
+    console.log(result);
+  });
+});
 
 // var config = {
 //   username: 'root',
