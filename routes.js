@@ -5,6 +5,37 @@ var multer = require('multer');
 var upload = multer();
 var mysql = require('mysql');
 
+
+const AWS = require('aws-sdk');
+const path = require('path');
+
+AWS.config.update({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+});
+
+var s3 = new AWS.S3();
+var filePath = "./queries.txt";
+
+var params = {
+  Bucket: 'picnic-book-bucket',
+  Body : fs.createReadStream(filePath),
+  Key : "folder/"+Date.now()+"_"+path.basename(filePath)
+};
+
+s3.upload(params, function (err, data) {
+  //handle error
+  if (err) {
+    console.log("Error", err);
+  }
+
+  //success
+  if (data) {
+    console.log("Uploaded in:", data.Location);
+  }
+});
+
+
 var con = mysql.createConnection({
   host: "us-cdbr-iron-east-02.cleardb.net",
   user: "b062127b2d7096",

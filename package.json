@@ -10,7 +10,9 @@
   "author": "Abdullah Abbasi",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.492.0",
     "express": "^4.16.4",
+    "fs": "0.0.1-security",
     "multer": "^1.4.1",
     "mysql": "^2.16.0"
   }
