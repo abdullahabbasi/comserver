@@ -11,6 +11,7 @@ http.createServer(function (req, res) {
 var express = require('express');
 var mysql = require('mysql');
 var bodyParser = require('body-parser')
+
 var app = express();
 
 var multer = require('multer');
@@ -28,9 +29,12 @@ app.use(bodyParser.urlencoded({
 }));
 
 app.use(express.static(__dirname + '/upload'));
+
 app.use(function (req, res, next) {
- console.log('body recieved');
-  console.log(req.body) // populated!
+ console.log('body recieved',req.body);
+ if(req.body && req.body.myemail) {
+    req.myobj = req.body;
+ }
   next()
 })
 
@@ -41,10 +45,12 @@ app.use('/api/', router);
 
 const PORT = process.env.PORT || 8081;
 app.listen(PORT);
-console.log('server started');
+console.log('server started at port ' + PORT);
 /*
 var wclient = new whmcs(config);
 //console.log('whmcs obj ', wclient);
 wclient.domains.getDomainNameservers('abdullahabbasi.pw', function(err, output) {
 });
 */
+
+

@@ -1,13 +1,52 @@
+use heroku_2fbd37a89f39bd3;
 
-/*  Create Product Table  */
-CREATE TABLE products (
+
+INSERT INTO post (file_name, fullname, email, postcomment) VALUES ('https://picnic-book-bucket.s3.amazonaws.com/folder/1562973085796_71d212c0cf14afe07247fbeca57ba90a','abdullah','abdullah@gmail.com','test again');
+
+/*  Create  POST  */
+
+CREATE TABLE post (
 	id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-	file_name VARCHAR(100),	//store server file path
-	name VARCHAR(30) NOT NULL,
-	description VARCHAR(100),
-	category VARCHAR(30),
-	brand VARCHAR(30),
-	price VARCHAR(10)
+	file_name VARCHAR(200),
+	fullname VARCHAR(50),
+	email VARCHAR(100),
+    postcomment VARCHAR(300),
+    dateupdated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 /*  End Create Product Table  */
+
+
+
+
+--------Notes------
+
+const AWS = require('aws-sdk');
+const path = require('path');
+
+AWS.config.update({
+  accessKeyId: '',
+  secretAccessKey: ''
+});
+
+var s3 = new AWS.S3();
+
+// var filePath = "./queries.txt";
+
+// var params = {
+//   Bucket: 'picnic-book-bucket',
+//   Body : fs.createReadStream(filePath),
+//   Key : "folder/"+Date.now()+"_"+path.basename(filePath)
+// };
+
+// s3.upload(params, function (err, data) {
+//   //handle error
+//   if (err) {
+//     console.log("Error", err);
+//   }
+
+//   //success
+//   if (data) {
+//     console.log("Uploaded in:", data.Location);
+//   }
+// });
