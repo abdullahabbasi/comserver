@@ -1,4 +1,6 @@
 var http = require('http');
+var cors = require('cors')
+
 //var whmcs = require('whmcs');
 /*
 http.createServer(function (req, res) {
@@ -10,15 +12,17 @@ http.createServer(function (req, res) {
 
 var express = require('express');
 var mysql = require('mysql');
-var bodyParser = require('body-parser')
-
-var app = express();
-
+var bodyParser = require('body-parser');
 var multer = require('multer');
 
+var app = express();
+app.use(cors())
+
+
 app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header('Access-Control-Allow-Origin: *');
+  res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token');
   next();
 });
 

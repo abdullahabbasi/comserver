@@ -10,8 +10,8 @@ const AWS = require('aws-sdk');
 const path = require('path');
 
 AWS.config.update({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+  accessKeyId: 'process.env.AWS_ACCESS_KEY_ID',
+  secretAccessKey: 'process.env.AWS_SECRET_ACCESS_KEY'
 });
 
 var s3 = new AWS.S3();
@@ -21,7 +21,7 @@ var con = mysql.createPool({
   user: "b062127b2d7096",
   password: "933cd167d970cb1",
   database: "heroku_2fbd37a89f39bd3",
-  connectionLimit: 1
+  connectionLimit: 100
 });
 
 // con.connect(function(err) {
@@ -95,6 +95,26 @@ router.get('/getAllPosts', function(req, res){
      }).on('error', function(error){
       console.log('error occured in getAllPosts ', error);
     });
+
+});
+
+router.post('/liked', function(req, res){
+  var postId = req.body && req.body.postId ? req.body.postId : '';
+  console.log('Request recieved to like postid ', postId);
+  if(postId == null && postId != '') {
+    res.status(200).json({success: false}).end();
+  } else {
+    
+    var  sql = "UPDATE post SET likes = likes + 1 WHERE id =" +  req.body.postId + ";";
+     con.query(sql, function (err, result, fields) {
+       console.log('result from update like', result);
+       if (err) throw err;
+           res.send({'success': true, 'text': 'like updated in db of '});
+       }).on('error', function(error){
+        console.log('error occured in getAllPosts ', error);
+      });
+  }
+  
 
 });
 
