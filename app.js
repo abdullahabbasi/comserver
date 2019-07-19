@@ -25,8 +25,7 @@ app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token');
   next();
 });
-
-app.use(multer({dest:'upload/'}).single('fileData'));
+app.use(multer({dest:'upload/'}).single('fileData'))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({
   extended: true

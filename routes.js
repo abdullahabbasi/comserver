@@ -54,9 +54,11 @@ router.post('/photoUpload',upload.single('fileData'), (req, res,next) => {
       Body : fs.createReadStream(fileName),
       Key : "folder/"+Date.now()+"_"+path.basename(fileName)
     };
-    
+    var start = new Date();
     s3.upload(params, function (err, data) {
       //handle error
+      var timeTaken = (new Date() - start)/1000;
+      console.info('Execution time of upload a photo in S3 '+ timeTaken + ' seconds');
       if (err) {
         console.log("Error", err);
         res.status(500).json({success: false}).end();
@@ -86,9 +88,12 @@ router.post('/photoUpload',upload.single('fileData'), (req, res,next) => {
 
 router.get('/getAllPosts', function(req, res){
   console.log('Request recieved get all products');
+  var start = new Date();
   var sql = "select * from post;"
    var resultArray  = [];
    con.query(sql, function (err, result, fields) {
+    var timeTaken = (new Date() - start)/1000;
+    console.info('Execution time of getAllPosts query is '+ timeTaken + ' seconds');
      if (err) throw err;
        resultArray = Object.values(JSON.parse(JSON.stringify(result)))
          res.send(resultArray);
