@@ -24,6 +24,7 @@ var con = mysql.createPool({
   connectionLimit: 100
 });
 
+var ipList = {};
 // con.connect(function(err) {
 //   if (err) throw err;
 //   console.log('MysqL Connected *****');
@@ -88,11 +89,6 @@ router.post('/photoUpload',upload.single('fileData'), (req, res,next) => {
 
 router.get('/getAllPosts', function(req, res){
   console.log('Request recieved get all products');
-  var ip = req.headers['x-forwarded-for'] || 
-  req.connection.remoteAddress || 
-  req.socket.remoteAddress ||
-  (req.connection.socket ? req.connection.socket.remoteAddress : null);
-  console.log('ip address calling from ', ip);
   var start = new Date();
   var sql = "select * from post;"
    var resultArray  = [];
@@ -109,10 +105,19 @@ router.get('/getAllPosts', function(req, res){
 });
 
 router.post('/liked', function(req, res){
+  var ip = req.headers['x-forwarded-for'] || 
+  req.connection.remoteAddress || 
+  req.socket.remoteAddress ||
+  (req.connection.socket ? req.connection.socket.remoteAddress : null);
+  console.log('ip address calling from ', ip);
+  
   var postId = req.body && req.body.postId ? req.body.postId : '';
   console.log('Request recieved to like postid ', postId);
-  if(postId == null && postId != '') {
-    res.status(200).json({success: false}).end();
+  if (ipblocker(postId, ip)){
+    res.status(200).json({success: false, errorCode: 1, text: 'Please dont cheat'}).end();
+  }
+   else if(postId == null && postId != '') {
+    res.status(200).json({success: false, errorCode: 2, text : 'no postid found'}).end();
   } else {
     
     var  sql = "UPDATE post SET likes = likes + 1 WHERE id =" +  req.body.postId + ";";
@@ -128,6 +133,23 @@ router.post('/liked', function(req, res){
 
 });
 
+function ipblocker(postId, ip) {
+  if(ipblocker[ip]) {
+    if(ipblocker[ip].includes(postId)){
+      console.log("***** ALERT ***** IP BLOCKED ******** ", ip);
+      return true;
+    } else {
+      ipblocker[ip].push(postId);
+      return false;
+    }
+  } else {
+
+    var newList = [];
+    newList.push(postId)
+    ipblocker[ip] = newList;
+    return false;
+  }
+}
 router.all("*", function(req, res) {
     res.status(404).json({success: false}).end();
 });
