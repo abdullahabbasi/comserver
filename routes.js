@@ -134,6 +134,7 @@ router.post('/liked', function(req, res){
 });
 
 function ipblocker(postId, ip) {
+  return false;
   if(ipblocker[ip]) {
     if(ipblocker[ip].includes(postId)){
       console.log("***** ALERT ***** IP BLOCKED ******** ", ip);
