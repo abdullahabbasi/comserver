@@ -68,7 +68,8 @@ router.post('/photoUpload',upload.single('fileData'), (req, res,next) => {
       //success
       if (data) {
         console.log("Uploaded in:", data.Location);
-        var sql = "INSERT INTO post2 (file_name, fullname, email, postcomment) VALUES ( '"+ data.Location +"','"+ req.myobj.myname + "','"+ req.myobj.myemail +"','"+ req.myobj.mycomment+"');"
+        let slide = req.myobj.slide ? Number(req.myobj.slide) : 0;
+        var sql = "INSERT INTO post2 (file_name, email, postcomment, greyscale) VALUES ( '"+ data.Location +"','"+ req.myobj.myemail +"','"+ req.myobj.mycomment+"','"+ slide +"');"
          var sqlResult  = '';
         con.query(sql, function (err, result, fields) {
          if (err) throw res.status(500).json({'msg': err }).end();;
