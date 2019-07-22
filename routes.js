@@ -68,7 +68,7 @@ router.post('/photoUpload',upload.single('fileData'), (req, res,next) => {
       //success
       if (data) {
         console.log("Uploaded in:", data.Location);
-        var sql = "INSERT INTO post (file_name, fullname, email, postcomment) VALUES ( '"+ data.Location +"','"+ req.myobj.myname + "','"+ req.myobj.myemail +"','"+ req.myobj.mycomment+"');"
+        var sql = "INSERT INTO post2 (file_name, fullname, email, postcomment) VALUES ( '"+ data.Location +"','"+ req.myobj.myname + "','"+ req.myobj.myemail +"','"+ req.myobj.mycomment+"');"
          var sqlResult  = '';
         con.query(sql, function (err, result, fields) {
          if (err) throw res.status(500).json({'msg': err }).end();;
@@ -90,7 +90,7 @@ router.post('/photoUpload',upload.single('fileData'), (req, res,next) => {
 router.get('/getAllPosts', function(req, res){
   console.log('Request recieved get all products');
   var start = new Date();
-  var sql = "select * from post;"
+  var sql = "select * from post2;"
    var resultArray  = [];
    con.query(sql, function (err, result, fields) {
     var timeTaken = (new Date() - start)/1000;
@@ -120,7 +120,7 @@ router.post('/liked', function(req, res){
     res.status(200).json({success: false, errorCode: 2, text : 'no postid found'}).end();
   } else {
     
-    var  sql = "UPDATE post SET likes = likes + 1 WHERE id =" +  req.body.postId + ";";
+    var  sql = "UPDATE post2 SET likes = likes + 1 WHERE id =" +  req.body.postId + ";";
      con.query(sql, function (err, result, fields) {
        console.log('result from update like', result);
        if (err) throw err;
