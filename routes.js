@@ -10,8 +10,8 @@ const AWS = require('aws-sdk');
 const path = require('path');
 
 AWS.config.update({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
 });
 
 var s3 = new AWS.S3();
@@ -25,6 +25,7 @@ var con = mysql.createPool({
 });
 
 var ipList = {};
+var uploadblocker = {};
 // con.connect(function(err) {
 //   if (err) throw err;
 //   console.log('MysqL Connected *****');
@@ -47,7 +48,14 @@ router.get('/', function(req, res){
 
 router.post('/photoUpload',upload.single('fileData'), (req, res,next) => {
   console.log('photo api invoked req.myobj', req.myobj);//this will be automatically set by multer
+  var ip = req.headers['x-forwarded-for'] || 
+  req.connection.remoteAddress || 
+  req.socket.remoteAddress ||
+  (req.connection.socket ? req.connection.socket.remoteAddress : null);
   try {
+    if (uploadBlocker(ip)) {
+       return res.status(200).json({ errorCode: 1 }).end();
+    }
     var fileName =__dirname +  '/upload/' +req.file.filename;
     console.log('name in api', req.body);
     var params = {
@@ -72,7 +80,7 @@ router.post('/photoUpload',upload.single('fileData'), (req, res,next) => {
         var sql = "INSERT INTO post2 (file_name, email, postcomment, greyscale) VALUES ( '"+ data.Location +"','"+ req.myobj.myemail +"','"+ req.myobj.mycomment+"','"+ slide +"');"
          var sqlResult  = '';
         con.query(sql, function (err, result, fields) {
-         if (err) throw res.status(500).json({'msg': err }).end();;
+         if (err) throw res.status(500).json({'msg': err }).end();
             sqlResult = result;
              console.log(result);
              res.status(200).json({success: true}).end();
@@ -152,9 +160,22 @@ function ipblocker(postId, ip) {
     return false;
   }
 }
+function uploadBlocker(ip) {
+  return false;
+  console.log('upload object state is ',  uploadblocker);
+  if(uploadblocker[ip] && uploadblocker[ip] > 2) {
+    console.log("***** ALERT ***** More than 2 upload ******** ", ip);
+    return true;
+  } else if(uploadblocker[ip] == null || uploadblocker[ip] == undefined || uploadblocker[ip] == 0) {
+    uploadblocker[ip] = 1;
+    return false;
+  } else {
+    uploadblocker[ip] = uploadblocker[ip] + 1;
+    return false;
+  } 
+}
 router.all("*", function(req, res) {
     res.status(404).json({success: false}).end();
 });
-
 
 module.exports = router;
