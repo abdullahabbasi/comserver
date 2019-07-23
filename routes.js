@@ -12,7 +12,9 @@ const path = require('path');
 var redis = require('redis');
 var client = redis.createClient(process.env.REDIS_URL, {no_ready_check: true});
 client.set('foo', 'bar');
-console.log('printing redis', client.get('foo'))
+client.get('foo', function(err, reply){
+  console.log('redis foo',reply);
+});
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
