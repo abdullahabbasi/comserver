@@ -1,5 +1,5 @@
 var cluster = require('cluster')
-
+console.log('cluster file executed');
 if(cluster.isMaster) {
     var cpuCount  = require('os').cpus().length;
     console.log('*** Machine Cores available is ', cpuCount)
@@ -10,5 +10,6 @@ if(cluster.isMaster) {
         cluster.fork();
     });
 } else {
+    console.log('requiring app in cluster');
     require('./app')
 }
