@@ -11,7 +11,7 @@ const path = require('path');
 
 var redis = require('redis');
 var client = redis.createClient(process.env.REDIS_URL, {no_ready_check: true});
-client.set('foo', 'bar');
+client.set('foo', {"abu": ["ip1", "ip2"]});
 client.get('foo', function(err, reply){
   console.log('redis foo',reply);
 });
