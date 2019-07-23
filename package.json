@@ -4,7 +4,7 @@
   "description": "server dependencies",
   "main": "app.js",
   "scripts": {
-    "start": "node cluster.js",
+    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Abdullah Abbasi",
