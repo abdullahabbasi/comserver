@@ -10,7 +10,7 @@ const AWS = require('aws-sdk');
 const path = require('path');
 
 var redis = require('redis');
-var client = redis.createClient(process.env.REDISCLOUD_URL, {no_ready_check: true});
+var client = redis.createClient(process.env.REDIS_URL, {no_ready_check: true});
 client.set('foo', 'bar');
 console.log('printing redis', client.get('foo'))
 AWS.config.update({
