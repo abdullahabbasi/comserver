@@ -9,10 +9,15 @@ var mysql = require('mysql');
 const AWS = require('aws-sdk');
 const path = require('path');
 
+var redis = require('redis');
+var client = redis.createClient(process.env.REDISCLOUD_URL, {no_ready_check: true});
+client.set('foo', 'bar');
+console.log('printing redis', client.get('foo'))
 AWS.config.update({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
 });
+
 
 var s3 = new AWS.S3();
 
@@ -36,6 +41,7 @@ var uploadblocker = {};
 
 router.get('/', function(req, res){
    console.log('Request recieved ping');
+   console.log('redis server cloud ');
    con.query("SELECT * FROM testtable", function (err, result, fields) {
     if (err) throw err;
     console.log(result);
