@@ -13,18 +13,20 @@ var redis = require('redis');
 var client = redis.createClient(process.env.REDIS_URL, {no_ready_check: true});
 const {promisify} = require('util');
 const getAsync = promisify(client.get).bind(client);
-var cacheIpBlocker = getIpBlocker();
-var cacheUploadBlocker = getLatestUploadBlocker();
-if(cacheIpBlocker == null || cacheIpBlocker == undefined) {
-  setIpBlocker({});
-}
 
-if(cacheUploadBlocker == null || cacheUploadBlocker == undefined) {
-  setLatestUploadBlocker({});
-}
+client.get('ipblocker', function (err, reply) {
+  if(reply == undefined || reply == null) {
+    client.set('ipblocker', JSON.stringify({}));
+  }
+});
+
+client.get('uploadblocker', function (err, reply) {
+  if(reply == undefined || reply == null) {
+    client.set('uploadblocker', JSON.stringify({}));
+  }
+});
 
 
-console.log('ipblocker is' , getIpBlocker());
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
@@ -41,8 +43,6 @@ var con = mysql.createPool({
   connectionLimit: 100
 });
 
-var ipList = {};
-var uploadblocker = {};
 // con.connect(function(err) {
 //   if (err) throw err;
 //   console.log('MysqL Connected *****');
@@ -71,43 +71,47 @@ router.post('/photoUpload',upload.single('fileData'), (req, res,next) => {
   req.socket.remoteAddress ||
   (req.connection.socket ? req.connection.socket.remoteAddress : null);
   try {
-    if (uploadBlocker(ip)) {
-       return res.status(200).json({ errorCode: 1 }).end();
-    }
-    var fileName =__dirname +  '/upload/' +req.file.filename;
-    console.log('name in api', req.body);
-    var params = {
-      Bucket: 'picnic-book-bucket',
-      Body : fs.createReadStream(fileName),
-      Key : "folder/"+Date.now()+"_"+path.basename(fileName)
-    };
-    var start = new Date();
-    s3.upload(params, function (err, data) {
-      //handle error
-      var timeTaken = (new Date() - start)/1000;
-      console.info('Execution time of upload a photo in S3 '+ timeTaken + ' seconds');
-      if (err) {
-        console.log("Error", err);
-        res.status(500).json({success: false}).end();
-      }
-    
-      //success
-      if (data) {
-        console.log("Uploaded in:", data.Location);
-        let slide = req.myobj.slide ? Number(req.myobj.slide) : 0;
-        var sql = "INSERT INTO post2 (file_name, email, postcomment, greyscale) VALUES ( '"+ data.Location +"','"+ req.myobj.myemail +"','"+ req.myobj.mycomment+"','"+ slide +"');"
-         var sqlResult  = '';
-        con.query(sql, function (err, result, fields) {
-         if (err) throw res.status(500).json({'msg': err }).end();
-            sqlResult = result;
-             console.log(result);
-             res.status(200).json({success: true}).end();
-         }).on('error', function(error){
-          console.log('error occured in upload ', error);
-        });
-
-      }
-    });
+    uploadBlocker(ip).then((res) => {
+      console.log('Is this ip should be blocked ', res)
+      if (res) {
+        return res.status(200).json({ errorCode: 1 }).end();
+     }
+     var fileName =__dirname +  '/upload/' +req.file.filename;
+     console.log('name in api', req.body);
+     var params = {
+       Bucket: 'picnic-book-bucket',
+       Body : fs.createReadStream(fileName),
+       Key : "folder/"+Date.now()+"_"+path.basename(fileName)
+     };
+     var start = new Date();
+     s3.upload(params, function (err, data) {
+       //handle error
+       var timeTaken = (new Date() - start)/1000;
+       console.info('Execution time of upload a photo in S3 '+ timeTaken + ' seconds');
+       if (err) {
+         console.log("Error", err);
+         res.status(500).json({success: false}).end();
+       }
+     
+       //success
+       if (data) {
+         console.log("Uploaded in:", data.Location);
+         let slide = req.myobj.slide ? Number(req.myobj.slide) : 0;
+         var sql = "INSERT INTO post2 (file_name, email, postcomment, greyscale) VALUES ( '"+ data.Location +"','"+ req.myobj.myemail +"','"+ req.myobj.mycomment+"','"+ slide +"');"
+          var sqlResult  = '';
+         con.query(sql, function (err, result, fields) {
+          if (err) throw res.status(500).json({'msg': err }).end();
+             sqlResult = result;
+              console.log(result);
+              res.status(200).json({success: true}).end();
+          }).on('error', function(error){
+           console.log('error occured in upload ', error);
+         });
+ 
+       }
+     });
+    })
+   
   } catch(e) {
     
   }
@@ -162,53 +166,46 @@ router.post('/liked', function(req, res){
 
 function ipblocker(postId, ip) {
   return false;
-  if(ipblocker[ip]) {
-    if(ipblocker[ip].includes(postId)){
-      console.log("***** ALERT ***** IP BLOCKED ******** ", ip);
-      return true;
+  return getAsync('ipblocker').then(function(res) {
+    var ipblockerObj = JSON.parse(res);
+    if(ipblockerObj[ip]) {
+      if(ipblockerObj[ip].includes(postId)){
+        console.log("***** ALERT ***** IP BLOCKED ******** ", ip);
+        return true;
+      } else {
+        ipblockerObj[ip].push(postId);
+        client.set('ipblocker', JSON.stringify(ipblockerObj));
+        return false;
+      }
     } else {
-      ipblocker[ip].push(postId);
+  
+      var newList = [];
+      newList.push(postId)
+      ipblockerObj[ip] = newList;
+      client.set('ipblocker', JSON.stringify(ipblockerObj));
       return false;
     }
-  } else {
-
-    var newList = [];
-    newList.push(postId)
-    ipblocker[ip] = newList;
-    return false;
-  }
+  });
+  
 }
 function uploadBlocker(ip) {
-  return false;
-  console.log('upload object state is ',  uploadblocker);
-  if(uploadblocker[ip] && uploadblocker[ip] > 2) {
-    console.log("***** ALERT ***** More than 2 upload ******** ", ip);
-    return true;
-  } else if(uploadblocker[ip] == null || uploadblocker[ip] == undefined || uploadblocker[ip] == 0) {
-    uploadblocker[ip] = 1;
-    return false;
-  } else {
-    uploadblocker[ip] = uploadblocker[ip] + 1;
-    return false;
-  } 
-}
-
-async function getLatestUploadBlocker() {
-  var uploadblocker = await getAsync('uploadblocker');
-  return JSON.parse(uploadblocker);
-}
-
-function setLatestUploadBlocker(obj) {
-  client.set('uploadblocker', JSON.stringify(obj));
-}
-
-async function getIpBlocker() {
-  var ipBlocker = await getAsync('ipblocker');
-  return JSON.parse(ipBlocker);
-}
-
-function setIpBlocker(obj) {
-  client.set('ipblocker', JSON.stringify(obj));
+  return getAsync("uploadblocker", (res) => {
+    uploadblockerObj = JSON.parse(res);
+    console.log('upload object state is ',  uploadblockerObj);
+    if(uploadblockerObj[ip] && uploadblockerObj[ip] > 2) {
+      console.log("***** ALERT ***** More than 2 upload ******** ", ip);
+      return true;
+    } else if(uploadblockerObj[ip] == null || uploadblockerObj[ip] == undefined || uploadblockerObj[ip] == 0) {
+      uploadblockerObj[ip] = 1;
+      client.set("uploadblocker", JSON.stringify(uploadblockerObj));
+      return false;
+    } else {
+      uploadblockerObj[ip] = uploadblockerObj[ip] + 1;
+      client.set("uploadblocker", JSON.stringify(uploadblockerObj));
+      return false;
+    } 
+  });
+  
 }
 
 router.all("*", function(req, res) {
