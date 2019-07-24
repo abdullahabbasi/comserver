@@ -13,6 +13,12 @@ var redis = require('redis');
 var client = redis.createClient(process.env.REDIS_URL, {no_ready_check: true});
 console.log('upload blocker now is ', getLatestUploadBlocker());
 console.log('ip blocker now is ', setIpBlocker());
+if(getLatestUploadBlocker() == undefined || getLatestUploadBlocker() == null) {
+  setLatestUploadBlocker({});
+}
+if(getIpBlocker() == undefined || getIpBlocker() == null) {
+  setIpBlocker({});
+}
 
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
