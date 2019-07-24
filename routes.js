@@ -11,10 +11,9 @@ const path = require('path');
 
 var redis = require('redis');
 var client = redis.createClient(process.env.REDIS_URL, {no_ready_check: true});
-client.set('foo', JSON.stringify({"abu": ["ip1", "ip2"]}));
-client.get('foo', function(err, reply){
-  console.log('redis foo', JSON.parse(reply));
-});
+console.log('upload blocker now is ', getLatestUploadBlocker());
+console.log('ip blocker now is ', setIpBlocker());
+
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
@@ -131,7 +130,7 @@ router.post('/liked', function(req, res){
   var postId = req.body && req.body.postId ? req.body.postId : '';
   console.log('Request recieved to like postid ', postId);
   if (ipblocker(postId, ip)){
-    res.status(200).json({success: false, errorCode: 1, text: 'Please dont cheat'}).end();
+    res.status(200).json({success: false, errorCode: 1, text: 'You have already liked this picture'}).end();
   }
    else if(postId == null && postId != '') {
     res.status(200).json({success: false, errorCode: 2, text : 'no postid found'}).end();
@@ -182,6 +181,29 @@ function uploadBlocker(ip) {
     return false;
   } 
 }
+
+function getLatestUploadBlocker() {
+  return client.get('uploadblocker', function (err, reply) {
+      return JSON.parse(reply)
+  })
+
+}
+
+function setLatestUploadBlocker(obj) {
+  client.set('uploadblocker', JSON.stringify(obj));
+}
+
+function getIpBlocker() {
+  return client.get('ipblocker', function (err, reply) {
+      return JSON.parse(reply)
+  })
+
+}
+
+function setIpBlocker(obj) {
+  client.set('ipblocker', JSON.stringify(obj));
+}
+
 router.all("*", function(req, res) {
     res.status(404).json({success: false}).end();
 });
