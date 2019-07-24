@@ -11,15 +11,14 @@ const path = require('path');
 
 var redis = require('redis');
 var client = redis.createClient(process.env.REDIS_URL, {no_ready_check: true});
-console.log('upload blocker now is ', getLatestUploadBlocker());
-console.log('ip blocker now is ', setIpBlocker());
+
 if(getLatestUploadBlocker() == undefined || getLatestUploadBlocker() == null) {
   setLatestUploadBlocker({});
 }
 if(getIpBlocker() == undefined || getIpBlocker() == null) {
   setIpBlocker({});
 }
-
+console.log('ipblocker is' , getIpBlocker());
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
@@ -190,7 +189,7 @@ function uploadBlocker(ip) {
 
 function getLatestUploadBlocker() {
   return client.get('uploadblocker', function (err, reply) {
-      JSON.parse(reply)
+      return JSON.parse(reply)
   })
 
 }
@@ -201,7 +200,7 @@ function setLatestUploadBlocker(obj) {
 
 function getIpBlocker() {
   return client.get('ipblocker', function (err, reply) {
-       JSON.parse(reply)
+       return JSON.parse(reply)
   })
 
 }
