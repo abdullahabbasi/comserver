@@ -11,13 +11,19 @@ const path = require('path');
 
 var redis = require('redis');
 var client = redis.createClient(process.env.REDIS_URL, {no_ready_check: true});
-
-if(getLatestUploadBlocker() == undefined || getLatestUploadBlocker() == null) {
-  setLatestUploadBlocker({});
-}
-if(getIpBlocker() == undefined || getIpBlocker() == null) {
+const {promisify} = require('util');
+const getAsync = promisify(client.get).bind(client);
+var cacheIpBlocker = getIpBlocker();
+var cacheUploadBlocker = getLatestUploadBlocker();
+if(cacheIpBlocker == null || cacheIpBlocker == undefined) {
   setIpBlocker({});
 }
+
+if(cacheUploadBlocker == null || cacheUploadBlocker == undefined) {
+  setLatestUploadBlocker({});
+}
+
+
 console.log('ipblocker is' , getIpBlocker());
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -187,22 +193,18 @@ function uploadBlocker(ip) {
   } 
 }
 
-function getLatestUploadBlocker() {
-  return client.get('uploadblocker', function (err, reply) {
-      return JSON.parse(reply)
-  })
-
+async function getLatestUploadBlocker() {
+  var uploadblocker = await getAsync('uploadblocker');
+  return JSON.parse(uploadblocker);
 }
 
 function setLatestUploadBlocker(obj) {
   client.set('uploadblocker', JSON.stringify(obj));
 }
 
-function getIpBlocker() {
-  return client.get('ipblocker', function (err, reply) {
-       return JSON.parse(reply)
-  })
-
+async function getIpBlocker() {
+  var ipBlocker = await getAsync('ipblocker');
+  return JSON.parse(ipBlocker);
 }
 
 function setIpBlocker(obj) {
