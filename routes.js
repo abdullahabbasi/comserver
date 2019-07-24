@@ -190,7 +190,7 @@ function uploadBlocker(ip) {
 
 function getLatestUploadBlocker() {
   return client.get('uploadblocker', function (err, reply) {
-      return JSON.parse(reply)
+      JSON.parse(reply)
   })
 
 }
@@ -201,7 +201,7 @@ function setLatestUploadBlocker(obj) {
 
 function getIpBlocker() {
   return client.get('ipblocker', function (err, reply) {
-      return JSON.parse(reply)
+       JSON.parse(reply)
   })
 
 }
