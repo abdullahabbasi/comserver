@@ -10,8 +10,8 @@ const AWS = require('aws-sdk');
 const path = require('path');
 
 var redis = require('redis');
+//var client = redis.createClient('redis://h:pe9fa47579bf8d3dbb7d077f0c0c174a6df831a86214be1a46acc7072ac0deb4c@ec2-3-221-250-213.compute-1.amazonaws.com:25689', {no_ready_check: true});
 var client = redis.createClient(process.env.REDIS_URL, {no_ready_check: true});
-
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
@@ -81,8 +81,10 @@ router.post('/photoUpload',upload.single('fileData'), (req, res,next) => {
       //success
       if (data) {
         console.log("Uploaded in:", data.Location);
+        console.log("req.myobj.rotateDegHidden :", req.myobj );
         let slide = req.myobj.slide ? Number(req.myobj.slide) : 0;
-        var sql = "INSERT INTO post2 (file_name, email, postcomment, greyscale) VALUES ( '"+ data.Location +"','"+ req.myobj.myemail +"','"+ req.myobj.mycomment+"','"+ slide +"');"
+        let rotate = req.myobj.rotateDegHidden ? Number(req.myobj.rotateDegHidden) : 0;
+        var sql = "INSERT INTO post2 (file_name, email, postcomment, greyscale, rotate) VALUES ( '"+ data.Location +"','"+ req.myobj.myemail +"','"+ req.myobj.mycomment+"','"+ slide +"','" + rotate + "');"
          var sqlResult  = '';
         con.query(sql, function (err, result, fields) {
          if (err) throw res.status(500).json({'msg': err }).end();
